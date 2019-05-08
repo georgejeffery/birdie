@@ -7,22 +7,19 @@ var sql = `SELECT ${option}, age from census_learn_sql`;
 
 router.get("/:query", function(req, res, next) {
   var countarray = [];
-  var age = 0;
-
+  var bb = {};
+  var output = {};
   var option = `\`` + `${decodeURI(req.params.query)}` + `\``;
-  var sql = `SELECT ${option}, age from census_learn_sql`;
+  var sql = `SELECT ${option} from census_learn_sql`;
   res.locals.connection.query(sql, function(error, results, fields) {
     if (error) {
       res.send(JSON.stringify({ status: 500, error: error, response: null }));
     } else {
       for (var i in results) {
         countarray.push(_.values(results[i])[0]);
-        age += results[i].age;
       }
-      var ave_age = age / results.length;
-      var output = _.countBy(countarray);
+      output = _.countBy(countarray);
       var list = _.uniq(countarray);
-      var bb = {};
       var out = 0;
       for (var x in list) {
         var section = '"' + `${list[x]}` + '"';
@@ -39,8 +36,11 @@ router.get("/:query", function(req, res, next) {
           }
         });
       }
-      res.send(JSON.stringify({ average_age: bb, sorted: output }));
     }
+
+    setTimeout(() => {
+      res.send(JSON.stringify({ average_age: bb, sorted: output }));
+    }, 1000);
   });
 });
 
