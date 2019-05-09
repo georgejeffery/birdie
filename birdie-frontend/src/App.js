@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
+
 import API from "./API";
 import "./App.css";
 import Selector from "./components/Selector";
 import { Grommet, Box } from "grommet";
 import Datatable from "./components/Datatable";
-import { throws } from "assert";
 
 class App extends Component {
   state = {

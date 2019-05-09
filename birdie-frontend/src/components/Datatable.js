@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import {
-  Grommet,
-  Table,
-  TableRow,
-  TableBody,
-  TableHeader,
-  TableCell
-} from "grommet";
+import { Table, TableRow, TableBody, TableHeader, TableCell } from "grommet";
 import _ from "lodash";
 import ReactLoading from "react-loading";
 
