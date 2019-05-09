@@ -3,9 +3,9 @@ const _ = require("lodash");
 const router = express.Router();
 
 router.get("/:query", function(req, res, next) {
-  let countarray = [];
-  let agehash = {};
-  let output = {};
+  const countarray = [];
+  const agehash = {};
+  const output = {};
   let option = `\`` + `${decodeURI(req.params.query)}` + `\``;
   let sql = `SELECT ${option} from census_learn_sql`;
   let dataPromise = new Promise((resolve, reject) => {
@@ -17,8 +17,8 @@ router.get("/:query", function(req, res, next) {
           countarray.push(_.values(results[i])[0]);
         }
         let intoutput = _.countBy(countarray);
-        var values = Object.values(intoutput);
-        var keys = Object.keys(intoutput);
+        let values = Object.values(intoutput);
+        let keys = Object.keys(intoutput);
         values.sort(function(a, b) {
           return b - a;
         });
