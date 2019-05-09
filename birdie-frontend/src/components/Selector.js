@@ -24,7 +24,7 @@ export default class Selector extends Component {
         >
           <Select
             margin={{ bottom: "10px" }}
-            placeholder="Choose a varable"
+            placeholder="Choose a variable"
             options={list}
             value={_.capitalize(this.state.value)}
             fill="true"
