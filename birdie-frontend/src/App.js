@@ -1,26 +1,46 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import logo from "./logo.svg";
+import API from "./API";
+import "./App.css";
+import Selector from "./components/Selector";
+import { Grommet, Box } from "grommet";
+import Datatable from "./components/Datatable";
+import { throws } from "assert";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = {
+    columns: [],
+    filter: "",
+    data: {}
+  };
+
+  addColumnsToState = () => {
+    API.getColumns().then(columns => {
+      console.log(columns);
+      this.setState({ columns: columns["output"] });
+    });
+  };
+
+  chooseFilter = event => {
+    this.setState({ filter: event });
+    API.getData(event).then(data => this.setState({ data: data }));
+  };
+
+  componentDidMount() {
+    this.setState({ columns: [] });
+    this.addColumnsToState();
+  }
+  render() {
+    return (
+      <Grommet>
+        <h1>Census Explorer</h1>
+        <Selector columns={this.state.columns} filter={this.chooseFilter} />
+        <Box margin={{ left: "large", right: "large" }}>
+          <Datatable filter={this.state.filter} data={this.state.data} />
+        </Box>
+      </Grommet>
+    );
+  }
 }
 
 export default App;

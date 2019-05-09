@@ -1,46 +1,66 @@
-var express = require("express");
-var _ = require("lodash");
-var router = express.Router();
-
-var option = "`class of worker`";
-var sql = `SELECT ${option}, age from census_learn_sql`;
+const express = require("express");
+const _ = require("lodash");
+const router = express.Router();
 
 router.get("/:query", function(req, res, next) {
-  var countarray = [];
-  var bb = {};
-  var output = {};
-  var option = `\`` + `${decodeURI(req.params.query)}` + `\``;
-  var sql = `SELECT ${option} from census_learn_sql`;
-  res.locals.connection.query(sql, function(error, results, fields) {
-    if (error) {
-      res.send(JSON.stringify({ status: 500, error: error, response: null }));
-    } else {
-      for (var i in results) {
-        countarray.push(_.values(results[i])[0]);
-      }
-      output = _.countBy(countarray);
-      var list = _.uniq(countarray);
-      var out = 0;
-      for (var x in list) {
-        var section = '"' + `${list[x]}` + '"';
-        q = `SELECT AVG(age) as ${section} FROM census_learn_sql WHERE ${option} = ${section}`;
-        //console.log(x);
-        res.locals.connection.query(q, function(error, result, fields) {
-          if (error) {
-            console.log(error);
-          } else {
-            name = _.keys(result[0])[0];
-            out = _.values(_.values(result)[0])[0];
-            console.log(name, out);
-            bb[name] = out;
-          }
+  let countarray = [];
+  let agehash = {};
+  let output = {};
+  let option = `\`` + `${decodeURI(req.params.query)}` + `\``;
+  let sql = `SELECT ${option} from census_learn_sql`;
+  let p = new Promise((resolve, reject) => {
+    res.locals.connection.query(sql, function(error, results, fields) {
+      if (error) {
+        // res.send(JSON.stringify({ status: 500, error: error, response: null }));
+        reject(JSON.stringify({ status: 500, error: error, response: null }));
+      } else {
+        for (let i in results) {
+          countarray.push(_.values(results[i])[0]);
+        }
+        let intoutput = _.countBy(countarray);
+        var values = Object.values(intoutput);
+        var keys = Object.keys(intoutput);
+        // Sort the keys in descending order
+        values.sort(function(a, b) {
+          return b - a;
         });
+        // Iterate through the array of keys and access the corresponding object properties
+        for (var i = 0; i < values.length; i++) {
+          output[keys[i]] = values[i];
+        }
+        let list = _.uniq(countarray);
+        let out = 0;
+        for (let x in list) {
+          let section = '"' + `${list[x]}` + '"';
+          q = `SELECT AVG(age) as ${section} FROM census_learn_sql WHERE ${option} = ${section}`;
+          //console.log(x);
+          res.locals.connection.query(q, function(error, result, fields) {
+            if (error) {
+              // console.log(error);
+              reject(
+                JSON.stringify({ status: 500, error: error, response: null })
+              );
+            } else {
+              name = _.keys(result[0])[0];
+              out = _.values(_.values(result)[0])[0];
+              // console.log(name, out);
+              agehash[name] = out;
+              if (x == list.length - 1) {
+                resolve(
+                  JSON.stringify({ average_age: agehash, sorted: output })
+                );
+              }
+            }
+          });
+        }
       }
-    }
+    });
+  });
 
-    setTimeout(() => {
-      res.send(JSON.stringify({ average_age: bb, sorted: output }));
-    }, 1000);
+  p.then(response => {
+    res.send(response);
+  }).catch(err => {
+    res.send(err);
   });
 });
 
