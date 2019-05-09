@@ -8,7 +8,7 @@ router.get("/:query", function(req, res, next) {
   let output = {};
   let option = `\`` + `${decodeURI(req.params.query)}` + `\``;
   let sql = `SELECT ${option} from census_learn_sql`;
-  let p = new Promise((resolve, reject) => {
+  let dataPromise = new Promise((resolve, reject) => {
     res.locals.connection.query(sql, function(error, results, fields) {
       if (error) {
         // res.send(JSON.stringify({ status: 500, error: error, response: null }));
@@ -57,11 +57,13 @@ router.get("/:query", function(req, res, next) {
     });
   });
 
-  p.then(response => {
-    res.send(response);
-  }).catch(err => {
-    res.send(err);
-  });
+  dataPromise
+    .then(response => {
+      res.send(response);
+    })
+    .catch(err => {
+      res.send(err);
+    });
 });
 
 module.exports = router;
